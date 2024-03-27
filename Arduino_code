@@ -1,0 +1,107 @@
+#include <LiquidCrystal.h> // includes the LiquidCrystal Library
+#define POTENTIOMETER_PIN A0
+int ledpin = 7;
+int readvalue = 0;
+int ledvalue = 0;
+const int redPin = 8;
+const int greenPin = 9;
+const int bluePin = 10;
+
+const byte  buttonPin = 13;    // the pin that the pushbutton is attached to
+const byte ledPin = 7;       // the pin that the LED is attached to
+
+bool buttonState = 0;         // current state of the button
+bool lastButtonState = 0;     // previous state of the button
+
+LiquidCrystal lcd(12, 11, 5, 4, 3, 2); // Creates an LCD object. Parameters: (rs, enable, d4, d5, d6, d7) 
+
+void setup() { 
+ Serial.begin(9600);
+ // set up the LCD's number of columns and rows:
+  lcd.begin(16, 2);
+  pinMode(ledpin, OUTPUT);
+
+  pinMode(redPin, OUTPUT);
+  pinMode(greenPin, OUTPUT);
+  pinMode(bluePin, OUTPUT);
+
+  // initialize the button pin as a input with internal pullup enabled
+   pinMode(buttonPin, INPUT_PULLUP);
+   // initialize the LED as an output:
+   pinMode(ledPin, OUTPUT);
+   // initialize serial communication:
+   Serial.begin(9600);
+
+}
+
+void loop() { 
+
+  static unsigned long timer = 0;
+   unsigned long interval = 50;  // check switch 20 times per second
+   if (millis() - timer >= interval)
+   {
+      timer = millis();
+      // read the pushbutton input pin:
+      buttonState = digitalRead(buttonPin);
+      // compare the new buttonState to its previous state
+      if (buttonState != lastButtonState)
+      {
+         if (buttonState == LOW)
+         {
+            // if the current state is LOW then the button
+            // went from off to on:
+            digitalWrite(ledPin, !digitalRead(ledPin)); // toggle the output
+         }
+      }
+      // save the current state as the last state,
+      //for next time through the loop
+      lastButtonState = buttonState;
+   }  
+  
+  int data = analogRead(POTENTIOMETER_PIN);
+    int percentage = map(data, 0, 1023, 0, 100);
+    lcd.clear();
+    lcd.setCursor(0, 0);
+    lcd.print("LED 1 ACTIVE");
+    lcd.setCursor(0, 1);
+    lcd.print("Intensity: ");
+    lcd.print(percentage);
+    lcd.print("%");
+    delay(100);
+
+    readvalue = analogRead(A0);
+    ledvalue = map(readvalue, 0, 1024, 0, 255);
+    analogWrite(ledpin, ledvalue);
+  // Color Red
+  digitalWrite(redPin, HIGH);
+  digitalWrite(greenPin, LOW);
+  digitalWrite(bluePin, LOW);
+  delay(1000);
+  // Color Green
+  digitalWrite(redPin, LOW);
+  digitalWrite(greenPin, HIGH);
+  digitalWrite(bluePin, LOW);
+  delay(1000);
+  // Color Blue
+  digitalWrite(redPin, LOW);
+  digitalWrite(greenPin, LOW);
+  digitalWrite(bluePin, HIGH);
+  delay(1000);
+  // Color Yellow
+  digitalWrite(redPin, HIGH);
+  digitalWrite(greenPin, HIGH);
+  digitalWrite(bluePin, LOW);
+  delay(1000);
+  // Color Cyan
+  digitalWrite(redPin, LOW);
+  digitalWrite(greenPin, HIGH);
+  digitalWrite(bluePin, HIGH);
+  delay(1000);
+  // Color Magenta
+  digitalWrite(redPin, HIGH);
+  digitalWrite(greenPin, LOW);
+  digitalWrite(bluePin, HIGH);
+  delay(1000);
+  
+
+}
