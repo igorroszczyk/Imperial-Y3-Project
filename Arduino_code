@@ -1,107 +1,99 @@
-#include <LiquidCrystal.h> // includes the LiquidCrystal Library
+#include <LiquidCrystal.h>
 #define POTENTIOMETER_PIN A0
-int ledpin = 7;
 int readvalue = 0;
 int ledvalue = 0;
-const int redPin = 8;
-const int greenPin = 9;
-const int bluePin = 10;
+int ledpin = 7;
+int Button_Selected = 0;
 
-const byte  buttonPin = 13;    // the pin that the pushbutton is attached to
-const byte ledPin = 7;       // the pin that the LED is attached to
+const int SWITCH_PIN_RED = 32;
+const int SWITCH_PIN_RGB = 34;
+const int SWITCH_PIN_BLUE = 33;
+const int SWITCH_PIN_GREEN = 35;
 
-bool buttonState = 0;         // current state of the button
-bool lastButtonState = 0;     // previous state of the button
 
-LiquidCrystal lcd(12, 11, 5, 4, 3, 2); // Creates an LCD object. Parameters: (rs, enable, d4, d5, d6, d7) 
+// initialize the library by associating any needed LCD interface pin
+// with the arduino pin number it is connected to
+const int rs = 12, en = 11, d4 = 5, d5 = 4, d6 = 3, d7 = 2;
+LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
 
-void setup() { 
- Serial.begin(9600);
- // set up the LCD's number of columns and rows:
+void setup() {
+  // set up the LCD's number of columns and rows:
   lcd.begin(16, 2);
-  pinMode(ledpin, OUTPUT);
-
-  pinMode(redPin, OUTPUT);
-  pinMode(greenPin, OUTPUT);
-  pinMode(bluePin, OUTPUT);
-
-  // initialize the button pin as a input with internal pullup enabled
-   pinMode(buttonPin, INPUT_PULLUP);
-   // initialize the LED as an output:
-   pinMode(ledPin, OUTPUT);
-   // initialize serial communication:
-   Serial.begin(9600);
+  pinMode(POTENTIOMETER_PIN, INPUT );
+  pinMode(SWITCH_PIN_RED, INPUT);
+  digitalWrite(SWITCH_PIN_RED, HIGH);
+  pinMode(SWITCH_PIN_RGB, INPUT);
+  digitalWrite(SWITCH_PIN_RGB, HIGH);
+  pinMode(SWITCH_PIN_BLUE, INPUT);
+  digitalWrite(SWITCH_PIN_BLUE, HIGH);
+  pinMode(SWITCH_PIN_GREEN, INPUT);
+  digitalWrite(SWITCH_PIN_GREEN, HIGH);
 
 }
 
-void loop() { 
+void loop() {
 
-  static unsigned long timer = 0;
-   unsigned long interval = 50;  // check switch 20 times per second
-   if (millis() - timer >= interval)
-   {
-      timer = millis();
-      // read the pushbutton input pin:
-      buttonState = digitalRead(buttonPin);
-      // compare the new buttonState to its previous state
-      if (buttonState != lastButtonState)
-      {
-         if (buttonState == LOW)
-         {
-            // if the current state is LOW then the button
-            // went from off to on:
-            digitalWrite(ledPin, !digitalRead(ledPin)); // toggle the output
-         }
+  int buttonStateRED = digitalRead(SWITCH_PIN_RED);
+  int buttonStateRGB = digitalRead(SWITCH_PIN_RGB);
+  int buttonStateBLUE = digitalRead(SWITCH_PIN_BLUE);
+  int buttonStateGREEN = digitalRead(SWITCH_PIN_GREEN);
+
+  if (buttonStateRED == HIGH && buttonStateRGB == HIGH && Button_Selected != 1 && Button_Selected != 2 && Button_Selected != 3 && Button_Selected != 4) {
+    Button_Selected = 0;
+  }
+
+
+  if (buttonStateRED == LOW  && Button_Selected != 1) {
+      Button_Selected = 1; // Update Button_Selected to 8
+  }
+
+    // Check if button 9 was pressed
+  if (buttonStateRGB == LOW && Button_Selected != 2) {
+    Button_Selected = 2; // Update Button_Selected to 9
+  }
+
+    if (buttonStateBLUE == LOW && Button_Selected != 3) {
+    Button_Selected = 3; // Update Button_Selected to 9
+  }
+
+    if (buttonStateGREEN == LOW && Button_Selected != 4) {
+    Button_Selected = 4; // Update Button_Selected to 9
+  }
+
+Serial.println(Button_Selected);
+
+    delay(50);
+
+      int data = analogRead(POTENTIOMETER_PIN);
+      int percentage = map(data, 0, 1023, 0, 100);
+      lcd.clear();
+      lcd.setCursor(0, 0);
+      if (Button_Selected == 0) {
+        lcd.print("CHOOSE LED");
       }
-      // save the current state as the last state,
-      //for next time through the loop
-      lastButtonState = buttonState;
-   }  
+      else if (Button_Selected == 1) {
+        lcd.print("RED LED ACTIVE");
+      }
+      else if (Button_Selected == 2) {
+        lcd.print("RGB LED ACTIVE");
+      }
+      else if (Button_Selected == 3) {
+        lcd.print("BLUE LED ACTIVE");
+      }
+      else if (Button_Selected == 4) {
+        lcd.print("GREEN LED ACTIVE");
+      }
+      lcd.setCursor(0, 1);
+      lcd.print("Intensity: ");
+      lcd.print(percentage);
+      lcd.print("%");
+      delay(100);
+    
+
+
   
-  int data = analogRead(POTENTIOMETER_PIN);
-    int percentage = map(data, 0, 1023, 0, 100);
-    lcd.clear();
-    lcd.setCursor(0, 0);
-    lcd.print("LED 1 ACTIVE");
-    lcd.setCursor(0, 1);
-    lcd.print("Intensity: ");
-    lcd.print(percentage);
-    lcd.print("%");
-    delay(100);
 
     readvalue = analogRead(A0);
     ledvalue = map(readvalue, 0, 1024, 0, 255);
     analogWrite(ledpin, ledvalue);
-  // Color Red
-  digitalWrite(redPin, HIGH);
-  digitalWrite(greenPin, LOW);
-  digitalWrite(bluePin, LOW);
-  delay(1000);
-  // Color Green
-  digitalWrite(redPin, LOW);
-  digitalWrite(greenPin, HIGH);
-  digitalWrite(bluePin, LOW);
-  delay(1000);
-  // Color Blue
-  digitalWrite(redPin, LOW);
-  digitalWrite(greenPin, LOW);
-  digitalWrite(bluePin, HIGH);
-  delay(1000);
-  // Color Yellow
-  digitalWrite(redPin, HIGH);
-  digitalWrite(greenPin, HIGH);
-  digitalWrite(bluePin, LOW);
-  delay(1000);
-  // Color Cyan
-  digitalWrite(redPin, LOW);
-  digitalWrite(greenPin, HIGH);
-  digitalWrite(bluePin, HIGH);
-  delay(1000);
-  // Color Magenta
-  digitalWrite(redPin, HIGH);
-  digitalWrite(greenPin, LOW);
-  digitalWrite(bluePin, HIGH);
-  delay(1000);
-  test
-
 }
